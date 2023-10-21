@@ -28,6 +28,7 @@ Route.group(() => {
   Route.get('/notes', `NotesController.index`)
   Route.post('/notes', `NotesController.store`)
   Route.get('/notes/:id', `NotesController.show`)
+  Route.get('/notes/:slug', `NotesController.showBySlug`)
   Route.put('/notes/:id', `NotesController.update`)
   Route.delete('/notes/:id', `NotesController.destroy`)
 }).middleware('auth')

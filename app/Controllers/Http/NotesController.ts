@@ -90,4 +90,30 @@ export default class NotesController {
       data: note[0],
     }
   }
+
+  public async show({ params, auth }) {
+    const note = await Database.from('notes')
+      .select('notes.*', Database.raw('tags::text[] as tags'))
+      .where('id', params.id)
+      .andWhere('owner_id', auth.use('api').user?.id)
+      .andWhere('is_deleted', false)
+      .first()
+
+    if (!note) {
+      return {
+        meta: {
+          status: 404,
+          message: 'Note not found',
+        },
+      }
+    }
+
+    return {
+      meta: {
+        status: 200,
+        message: 'Success',
+      },
+      data: note,
+    }
+  }
 }
