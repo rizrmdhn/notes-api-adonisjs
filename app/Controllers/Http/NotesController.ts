@@ -5,15 +5,16 @@ import Database from '@ioc:Adonis/Lucid/Database'
 export default class NotesController {
   public async index({ auth }) {
     await auth.use('api').authenticate()
-    const notes = await Database.from('notes').select('*')
+
+    const notes = await Database.from('notes')
+      .select('*')
+      .where('owner_id', auth.use('api').user?.id)
     return {
       meta: {
         status: 200,
         message: 'Success',
-        total: notes.length,
       },
       data: notes,
-      auth: auth.user,
     }
   }
 
