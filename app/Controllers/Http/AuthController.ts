@@ -4,22 +4,22 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class AuthController {
   public async login({ auth, request, response }) {
-    const { email, password } = request.body()
+    const { email, username, password } = request.body()
 
-    const loginWithEmailSchema = schema.create({
-      email: schema.string([rules.email()]),
-      password: schema.string([rules.minLength(8)]),
-    })
+    if (email) {
+      const loginWithEmailSchema = schema.create({
+        email: schema.string([rules.email()]),
+        password: schema.string([rules.minLength(8)]),
+      })
 
-    const customMessage = {
-      'required': 'The {{ field }} is required to login.',
-      'email.email': 'The email must be a valid email address.',
-      'password.minLength': 'The password must be at least 8 characters.',
-    }
+      const customMessage = {
+        'required': 'The {{ field }} is required to login.',
+        'email.email': 'The email must be a valid email address.',
+        'password.minLength': 'The password must be at least 8 characters.',
+      }
 
-    await request.validate({ schema: loginWithEmailSchema, messages: customMessage })
+      await request.validate({ schema: loginWithEmailSchema, messages: customMessage })
 
-    try {
       const token = await auth.use('api').attempt(email, password)
 
       return {
@@ -29,14 +29,29 @@ export default class AuthController {
         },
         data: token,
       }
-    } catch (e) {
-      return response.badRequest({
-        meta: {
-          status: 400,
-          message: 'Bad Request',
-        },
-        data: e.message,
+    } else {
+      const loginWithUsernameSchema = schema.create({
+        username: schema.string([rules.minLength(3)]),
+        password: schema.string([rules.minLength(8)]),
       })
+
+      const customMessage = {
+        'required': 'The {{ field }} is required to login.',
+        'username.minLength': 'The username must be at least 3 characters.',
+        'password.minLength': 'The password must be at least 8 characters.',
+      }
+
+      await request.validate({ schema: loginWithUsernameSchema, messages: customMessage })
+
+      const token = await auth.use('api').attempt(username, password)
+
+      return {
+        meta: {
+          status: 200,
+          message: 'Success',
+        },
+        data: token,
+      }
     }
   }
 

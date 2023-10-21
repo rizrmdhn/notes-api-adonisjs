@@ -25,10 +25,11 @@ Route.post('/logout', `AuthController.logout`)
 Route.post('/register', `UsersController.store`)
 
 Route.group(() => {
-  Route.get('/notes', `NotesController.index`)
+  Route.get('/notes/all', `NotesController.index`)
   Route.post('/notes', `NotesController.store`)
-  Route.get('/notes/:id', `NotesController.show`)
+  Route.get('/notes', `NotesController.show`)
   Route.get('/notes/:slug', `NotesController.showBySlug`)
   Route.put('/notes/:id', `NotesController.update`)
   Route.delete('/notes/:id', `NotesController.destroy`)
+  Route.post('/notes/:id/restore', `NotesController.restore`)
 }).middleware('auth')

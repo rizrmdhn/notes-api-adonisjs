@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.string('name').notNullable().unique()
       table.integer('owner_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
       table.boolean('is_public').defaultTo(false).notNullable()
-      table.boolean('is_private').defaultTo(false).notNullable()
+      table.boolean('is_private').defaultTo(true).notNullable()
       table.boolean('is_friend_only').defaultTo(false).notNullable()
       table.boolean('is_deleted').defaultTo(false).notNullable()
       table.timestamp('created_at', { useTz: true }).defaultTo(this.now())

@@ -18,7 +18,7 @@ export default class extends BaseSchema {
       table.integer('folder_id').unsigned().references('id').inTable('folders').onDelete('CASCADE')
       table.boolean('is_friend_only').defaultTo(false).notNullable()
       table.boolean('is_public').defaultTo(false).notNullable()
-      table.boolean('is_private').defaultTo(false).notNullable()
+      table.boolean('is_private').defaultTo(true).notNullable()
       table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true })
       table.timestamp('deleted_at', { useTz: true }).nullable()
