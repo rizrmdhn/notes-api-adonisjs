@@ -3,7 +3,7 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class AuthController {
-  public async login({ auth, request, response }) {
+  public async login({ auth, request }) {
     const { email, username, password } = request.body()
 
     if (email) {
