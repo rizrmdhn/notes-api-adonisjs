@@ -5,7 +5,7 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').primary()
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
@@ -16,7 +16,7 @@ export default class extends BaseSchema {
       table.boolean('is_private').defaultTo(false).notNullable()
       table.boolean('is_friend_only').defaultTo(false).notNullable()
       table.boolean('is_deleted').defaultTo(false).notNullable()
-      table.timestamp('created_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true })
       table.timestamp('deleted_at', { useTz: true }).nullable()
     })

@@ -20,4 +20,12 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', `NotesController.index`)
+Route.post('/login', `AuthController.login`)
+Route.post('/logout', `AuthController.logout`)
+Route.post('/register', `UsersController.store`)
+
+Route.get('/notes', `NotesController.index`)
+Route.post('/notes', `NotesController.store`)
+Route.get('/notes/:id', `NotesController.show`)
+Route.put('/notes/:id', `NotesController.update`)
+Route.delete('/notes/:id', `NotesController.destroy`)
