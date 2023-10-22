@@ -34,7 +34,7 @@ export default class Friendrequestchecker {
       response.status(400).send({
         meta: {
           status: 400,
-          message: 'You already sent a friend request to this user',
+          message: 'You already received a friend request from this user',
         },
       })
       return
