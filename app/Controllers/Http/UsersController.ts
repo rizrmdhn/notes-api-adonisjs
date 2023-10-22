@@ -5,6 +5,32 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsersController {
+  public async index({ auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+      return
+    }
+
+    const users = await Database.from('users')
+      .select('id', 'name', 'email', 'username', 'created_at', 'updated_at')
+      .whereNot('id', userId)
+      .returning('*')
+
+    return response.status(200).send({
+      meta: {
+        status: 200,
+        message: 'Success',
+      },
+      data: users,
+    })
+  }
+
   public async store({ request }: HttpContextContract) {
     const { name, email, username, password } = request.body()
 

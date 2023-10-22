@@ -25,6 +25,7 @@ Route.post('/logout', `AuthController.logout`)
 Route.post('/register', `UsersController.store`)
 
 Route.group(() => {
+  Route.get('/users', `UsersController.index`)
   Route.get('/users/me', `UsersController.show`)
 
   Route.get('/notes/all', `NotesController.index`)
