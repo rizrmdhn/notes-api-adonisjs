@@ -1,9 +1,9 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class AuthController {
-  public async login({ auth, request }) {
+  public async login({ auth, request }: HttpContextContract) {
     const { email, username, password } = request.body()
 
     if (email) {
@@ -55,7 +55,7 @@ export default class AuthController {
     }
   }
 
-  public async logout({ auth }) {
+  public async logout({ auth }: HttpContextContract) {
     await auth.use('api').revoke()
     return {
       meta: {

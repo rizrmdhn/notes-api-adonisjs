@@ -1,14 +1,24 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Database from '@ioc:Adonis/Lucid/Database'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Env from '@ioc:Adonis/Core/Env'
 
 export default class NotesController {
-  public async index({ auth }) {
+  public async index({ auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
+
     const notes = await Database.from('notes')
       .select('notes.*', Database.raw('tags::text[] as tags'))
-      .where('owner_id', auth.use('api').user?.id)
+      .where('owner_id', userId)
       .andWhere('is_deleted', false)
       .then((notes) => {
         return notes.map((note) => {
@@ -17,16 +27,16 @@ export default class NotesController {
         })
       })
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: notes,
-    }
+    })
   }
 
-  public async store({ request, auth }) {
+  public async store({ request, auth, response }: HttpContextContract) {
     const { title, content, tags, folderId, isFriendOnly, isPrivate, isPublic } = request.body()
 
     const createNoteSchema = schema.create({
@@ -87,16 +97,26 @@ export default class NotesController {
         })
       })
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note[0],
-    }
+    })
   }
 
-  public async show({ request, auth }) {
+  public async show({ request, auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
+
     const { id, slug } = request.qs()
     let note = null as any
     if (id) {
@@ -120,7 +140,7 @@ export default class NotesController {
 
         if (note.is_friend_only && note.owner_id !== auth.use('api').user?.id) {
           const isFriend = await Database.from('friends')
-            .where('user_id', auth.use('api').user?.id)
+            .where('user_id', userId)
             .andWhere('friend_id', note.owner_id)
             .first()
 
@@ -151,56 +171,76 @@ export default class NotesController {
       note = await Database.from('notes')
         .select('notes.*', Database.raw('tags::text[] as tags'))
         .where('slug', slug)
-        .andWhere('owner_id', auth.use('api').user?.id)
+        .andWhere('owner_id', userId)
         .andWhere('is_deleted', false)
         .first()
     }
 
     if (!note) {
-      return {
+      return response.status(404).send({
         meta: {
           status: 404,
           message: 'Note not found',
         },
-      }
+      })
     }
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note,
-    }
+    })
   }
 
-  public async showBySlug({ params, auth }) {
+  public async showBySlug({ params, auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
+
     const note = await Database.from('notes')
       .select('notes.*', Database.raw('tags::text[] as tags'))
       .where('slug', params.slug)
-      .andWhere('owner_id', auth.use('api').user?.id)
+      .andWhere('owner_id', userId)
       .andWhere('is_deleted', false)
       .first()
 
     if (!note) {
-      return {
+      return response.status(404).send({
         meta: {
           status: 404,
           message: 'Note not found',
         },
-      }
+      })
     }
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note,
-    }
+    })
   }
 
-  public async update({ request, params, auth }) {
+  public async update({ request, params, auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
+
     let { title, content, tags, folderId, isFriendOnly, isPrivate, isPublic } = request.body()
 
     const updateNoteSchema = schema.create({
@@ -239,7 +279,7 @@ export default class NotesController {
 
     const note = await Database.from('notes')
       .where('id', params.id)
-      .andWhere('owner_id', auth.use('api').user?.id)
+      .andWhere('owner_id', userId)
       .andWhere('is_deleted', false)
       .update({
         title,
@@ -274,19 +314,28 @@ export default class NotesController {
         })
       })
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note[0],
-    }
+    })
   }
 
-  public async destroy({ params, auth }) {
+  public async destroy({ params, auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
     const note = await Database.from('notes')
       .where('id', params.id)
-      .andWhere('owner_id', auth.use('api').user?.id)
+      .andWhere('owner_id', userId)
       .andWhere('is_deleted', false)
       .update({
         is_deleted: true,
@@ -315,19 +364,28 @@ export default class NotesController {
         })
       })
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note[0],
-    }
+    })
   }
 
-  public async restore({ params, auth }) {
+  public async restore({ params, auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    if (!userId) {
+      return response.unauthorized({
+        meta: {
+          status: 401,
+          message: 'Please login first',
+        },
+      })
+    }
     const note = await Database.from('notes')
       .where('id', params.id)
-      .andWhere('owner_id', auth.use('api').user?.id)
+      .andWhere('owner_id', userId)
       .andWhere('is_deleted', true)
       .update({
         is_deleted: false,
@@ -356,12 +414,12 @@ export default class NotesController {
         })
       })
 
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
       data: note[0],
-    }
+    })
   }
 }
