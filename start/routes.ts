@@ -25,6 +25,8 @@ Route.post('/logout', `AuthController.logout`)
 Route.post('/register', `UsersController.store`)
 
 Route.group(() => {
+  Route.get('/users/me', `UsersController.show`)
+
   Route.get('/notes/all', `NotesController.index`)
   Route.post('/notes', `NotesController.store`)
   Route.get('/notes', `NotesController.show`)
@@ -47,4 +49,5 @@ Route.group(() => {
   Route.delete('/friends/:id', `FriendsController.destroy`)
   Route.post('/friends/:id/accept', `FriendsController.accept`)
   Route.post('/friends/:id/reject', `FriendsController.reject`)
+  Route.post('/friends/:id/cancel', `FriendsController.cancel`)
 }).middleware('auth')

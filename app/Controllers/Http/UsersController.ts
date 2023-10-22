@@ -1,11 +1,11 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Database from '@ioc:Adonis/Lucid/Database'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsersController {
-  public async store({ request }) {
+  public async store({ request }: HttpContextContract) {
     const { name, email, username, password } = request.body()
 
     const registerSchema = schema.create({
@@ -46,5 +46,31 @@ export default class UsersController {
       },
       data: user,
     }
+  }
+
+  public async show({ auth, response }: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+
+    if (userId) {
+      const user = await Database.from('users')
+        .select('id', 'name', 'email', 'username', 'created_at', 'updated_at')
+        .where('id', userId)
+        .first()
+
+      return response.status(200).send({
+        meta: {
+          status: 200,
+          message: 'Success',
+        },
+        data: user,
+      })
+    }
+
+    return response.unauthorized({
+      meta: {
+        status: 401,
+        message: 'Please login first',
+      },
+    })
   }
 }
