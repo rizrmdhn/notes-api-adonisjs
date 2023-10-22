@@ -3,7 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class AuthController {
-  public async login({ auth, request }: HttpContextContract) {
+  public async login({ auth, request, response }: HttpContextContract) {
     const { email, username, password } = request.body()
 
     if (email) {
@@ -18,17 +18,27 @@ export default class AuthController {
         'password.minLength': 'The password must be at least 8 characters.',
       }
 
-      await request.validate({ schema: loginWithEmailSchema, messages: customMessage })
+      try {
+        await request.validate({ schema: loginWithEmailSchema, messages: customMessage })
+      } catch (error) {
+        return response.badRequest({
+          meta: {
+            status: 400,
+            message: 'Bad Request',
+          },
+          data: error.messages,
+        })
+      }
 
       const token = await auth.use('api').attempt(email, password)
 
-      return {
+      return response.status(200).send({
         meta: {
           status: 200,
           message: 'Success',
         },
         data: token,
-      }
+      })
     } else {
       const loginWithUsernameSchema = schema.create({
         username: schema.string([rules.minLength(3)]),
@@ -41,27 +51,37 @@ export default class AuthController {
         'password.minLength': 'The password must be at least 8 characters.',
       }
 
-      await request.validate({ schema: loginWithUsernameSchema, messages: customMessage })
+      try {
+        await request.validate({ schema: loginWithUsernameSchema, messages: customMessage })
+      } catch (error) {
+        return response.badRequest({
+          meta: {
+            status: 400,
+            message: 'Bad Request',
+          },
+          data: error.messages,
+        })
+      }
 
       const token = await auth.use('api').attempt(username, password)
 
-      return {
+      return response.status(200).send({
         meta: {
           status: 200,
           message: 'Success',
         },
         data: token,
-      }
+      })
     }
   }
 
-  public async logout({ auth }: HttpContextContract) {
+  public async logout({ auth, response }: HttpContextContract) {
     await auth.use('api').revoke()
-    return {
+    return response.status(200).send({
       meta: {
         status: 200,
         message: 'Success',
       },
-    }
+    })
   }
 }

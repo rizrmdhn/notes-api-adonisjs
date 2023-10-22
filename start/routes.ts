@@ -47,10 +47,11 @@ Route.group(() => {
   Route.delete('/bulk-delete/categories', `CategoriesController.bulkDelete`)
 
   Route.get('/folders', `FoldersController.index`)
-  Route.post('/folders', `FoldersController.store`)
+  Route.post('/folders', `FoldersController.store`).middleware(['createFolderCategoryChecker'])
   Route.get('/folders/:id', `FoldersController.show`)
   Route.put('/folders/:id', `FoldersController.update`)
   Route.delete('/folders/:id', `FoldersController.destroy`)
+  Route.post('/folders/:id/restore', `FoldersController.restore`)
 
   Route.get('/friends', `FriendsController.index`)
   Route.post('/friends/:id', `FriendsController.store`).middleware([

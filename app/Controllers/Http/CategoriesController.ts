@@ -100,27 +100,37 @@ export default class CategoriesController {
       return
     }
 
-    const category = await Database.table('categories')
-      .insert({
-        name,
-        owner_id: userId,
-        is_public: isPublic,
-        is_private: isPrivate,
-        is_friend_only: isFriendOnly,
-      })
-      .returning('*')
+    try {
+      const category = await Database.table('categories')
+        .insert({
+          name,
+          owner_id: userId,
+          is_public: isPublic,
+          is_private: isPrivate,
+          is_friend_only: isFriendOnly,
+        })
+        .returning('*')
 
-    return response.status(201).send({
-      meta: {
-        status: 201,
-        message: 'Success',
-      },
-      data: category[0],
-    })
+      return response.status(201).send({
+        meta: {
+          status: 201,
+          message: 'Success',
+        },
+        data: category[0],
+      })
+    } catch (error) {
+      response.badRequest({
+        meta: {
+          status: 400,
+          message: error.messages,
+        },
+      })
+    }
   }
 
   public async show({ auth, params, response }: HttpContextContract) {
     const userId = auth.use('api').user?.id
+    const { id } = params
     if (!userId) {
       response.unauthorized({
         meta: {
@@ -131,10 +141,20 @@ export default class CategoriesController {
       return
     }
 
+    if (isNaN(id)) {
+      response.badRequest({
+        meta: {
+          status: 400,
+          message: 'Id must be a number',
+        },
+      })
+      return
+    }
+
     const category = await Database.from('categories')
       .select('categories.*')
       .where('owner_id', userId)
-      .andWhere('id', params.id)
+      .andWhere('id', id)
       .andWhere('is_deleted', false)
       .first()
 
@@ -159,11 +179,22 @@ export default class CategoriesController {
 
   public async update({ auth, params, request, response }: HttpContextContract) {
     const userId = auth.use('api').user?.id
+    const { id } = params
     if (!userId) {
       response.unauthorized({
         meta: {
           status: 401,
           message: 'Please login first',
+        },
+      })
+      return
+    }
+
+    if (isNaN(id)) {
+      response.badRequest({
+        meta: {
+          status: 400,
+          message: 'Id must be a number',
         },
       })
       return
@@ -203,7 +234,7 @@ export default class CategoriesController {
     const category = await Database.from('categories')
       .select('categories.*')
       .where('owner_id', userId)
-      .andWhere('id', params.id)
+      .andWhere('id', id)
       .first()
 
     if (!category) {
@@ -217,7 +248,7 @@ export default class CategoriesController {
     }
 
     const updatedCategory = await Database.from('categories')
-      .where('id', params.id)
+      .where('id', id)
       .update({
         name,
         is_public: isPublic,
@@ -238,6 +269,8 @@ export default class CategoriesController {
 
   public async destroy({ auth, params, response }: HttpContextContract) {
     const userId = auth.use('api').user?.id
+    const { id } = params
+
     if (!userId) {
       response.unauthorized({
         meta: {
@@ -248,10 +281,20 @@ export default class CategoriesController {
       return
     }
 
+    if (isNaN(id)) {
+      response.badRequest({
+        meta: {
+          status: 400,
+          message: 'Id must be a number',
+        },
+      })
+      return
+    }
+
     const category = await Database.from('categories')
       .select('categories.*')
       .where('owner_id', userId)
-      .andWhere('id', params.id)
+      .andWhere('id', id)
       .first()
 
     if (!category) {
@@ -264,11 +307,20 @@ export default class CategoriesController {
       return
     }
 
-    await Database.from('categories').where('id', params.id).update({
-      is_deleted: true,
-      updated_at: 'now()',
-      deleted_at: 'now()',
-    })
+    try {
+      await Database.from('categories').where('id', id).update({
+        is_deleted: true,
+        updated_at: 'now()',
+        deleted_at: 'now()',
+      })
+    } catch (error) {
+      response.badRequest({
+        meta: {
+          status: 400,
+          message: error.messages,
+        },
+      })
+    }
 
     return response.status(200).send({
       meta: {
