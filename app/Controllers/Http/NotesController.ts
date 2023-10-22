@@ -56,7 +56,17 @@ export default class NotesController {
       'content.minLength': 'The content must be at least 3 characters.',
     }
 
-    await request.validate({ schema: createNoteSchema, messages: customMessage })
+    try {
+      await request.validate({ schema: createNoteSchema, messages: customMessage })
+    } catch (error) {
+      return response.status(400).send({
+        meta: {
+          status: 400,
+          message: 'Validation error',
+        },
+        data: error.messages,
+      })
+    }
 
     const slug = title
       .toLowerCase()
@@ -260,7 +270,17 @@ export default class NotesController {
       'content.minLength': 'The content must be at least 3 characters.',
     }
 
-    await request.validate({ schema: updateNoteSchema, messages: customMessage })
+    try {
+      await request.validate({ schema: updateNoteSchema, messages: customMessage })
+    } catch (error) {
+      return response.status(400).send({
+        meta: {
+          status: 400,
+          message: 'Validation error',
+        },
+        data: error.messages,
+      })
+    }
 
     if (isPrivate && isPublic) {
       return {

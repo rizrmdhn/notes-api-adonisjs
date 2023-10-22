@@ -36,6 +36,16 @@ Route.group(() => {
   Route.delete('/notes/:id', `NotesController.destroy`)
   Route.post('/notes/:id/restore', `NotesController.restore`)
 
+  Route.get('/categories', `CategoriesController.index`)
+  Route.get('/categories/deleted', `CategoriesController.indexDeleted`)
+  Route.post('/categories', `CategoriesController.store`).middleware(['categoriesChecker'])
+  Route.get('/categories/:id', `CategoriesController.show`)
+  Route.put('/categories/:id', `CategoriesController.update`)
+  Route.delete('/categories/:id', `CategoriesController.destroy`)
+  Route.post('/categories/:id/restore', `CategoriesController.restore`)
+  Route.delete('/categories/:id/permanent-delete', `CategoriesController.permanentDelete`)
+  Route.delete('/bulk-delete/categories', `CategoriesController.bulkDelete`)
+
   Route.get('/folders', `FoldersController.index`)
   Route.post('/folders', `FoldersController.store`)
   Route.get('/folders/:id', `FoldersController.show`)

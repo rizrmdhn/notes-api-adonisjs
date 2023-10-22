@@ -43,4 +43,5 @@ Server.middleware.registerNamed({
   authChecker: () => import('App/Middleware/Authchecker'),
   friendRequestChecker: () => import('App/Middleware/Friendrequestchecker'),
   friendSentChecker: () => import('App/Middleware/Friendsentchecker'),
+  categoriesChecker: () => import('App/Middleware/CategoriesChecker'),
 })
